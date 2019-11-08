@@ -1,3 +1,10 @@
+let Point = class {
+  constructor(x,y) {
+    this.x = x;
+    this.y = y;
+  }
+}
+
 let SeamCarvingBackPointer = class {
   constructor(energy, pointer, current) {
     this.energy = energy;
@@ -11,7 +18,7 @@ let SeamCarving = class {
     this.energies = arr;
   }
 
-  findMinimumParent(data) {
+  findMinimumBackpointer(data) {
     let current = data[0];
     for (let i = 1; i < data.length; i++) {
       if (data[i].energy < current.energy) {
@@ -19,6 +26,20 @@ let SeamCarving = class {
       }
     }
     return current;
+  }
+
+  getMinimumSeam(seams) {
+    let backTrace = [];
+    let bottomRow = seams[seams.length - 1];
+    let node = this.findMinimumBackpointer(bottomRow);
+    console.log(node.energy + ' ' + node.current + ' ' + (seams.length - 1) + ' '  + node.xPointer);
+    backTrace.push(new Point(node.current, seams.length - 1));
+    for (let y = seams.length - 2; y >= 0; y--){
+      node = seams[y, node.xPointer];
+      console.log(node.energy + ' ' + node.current + ' ' + y + ' ' + node.xPointer);
+      backTrace.push(new Point(node.current, y));
+    }
+    return backTrace.reverse();
   }
 
   computeMinimumSeam() {
@@ -36,7 +57,7 @@ let SeamCarving = class {
       for (let j = 0; j < energiesRow.length; j++) {
         const left = Math.max(j - 1, 0);
         const right = Math.min(j + 1, energiesRow.length - 1);
-        const minParent = this.findMinimumParent(seamEnergies[i-1].slice(left, right + 1));
+        const minParent = this.findMinimumBackpointer(seamEnergies[i-1].slice(left, right + 1));
         const minSeamEnergy = new SeamCarvingBackPointer(energiesRow[j] + seamEnergies[i-1][minParent.current].energy, 
                                                           minParent.current, j);
         seamEnergiesRow.push(minSeamEnergy);
@@ -45,7 +66,8 @@ let SeamCarving = class {
       seamEnergies.push(seamEnergiesRow);
     }
 
-    return seamEnergies;
+    console.log(seamEnergies);
+    return this.getMinimumSeam(seamEnergies);
   }
 
   computeMinimumSeamEnergy() {
