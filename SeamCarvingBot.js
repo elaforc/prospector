@@ -18,7 +18,11 @@ game.initialize().then(async () => {
         const { gameMap, me } = game;
         const converter = new MapConverter();
         let energies = converter.convertMap(gameMap);
-        logging.debug(energies);
+        const shipYardXPosition = me.shipyard.position.x;
+        const energyMaximizer = new EnergyMaximizer(energies.map(
+                                      i => i.slice(shipYardXPosition - 5, shipYardXPosition + 5)));
+        let seam = energyMaximizer.computeMaximumSeam();
+        logging.debug(seam);
 
         const commandQueue = [];
 

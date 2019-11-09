@@ -169,10 +169,12 @@ console.log(seamCarving.computeMinimumSeam());
 const maxArr = [
   [0, 0, 9, 0, 0],
   [0, 9, 0, 8, 0],
-  [0, 0, 9, 0, 9],
-  [0, 9, 0, 9, 0]
+  [0, 0, 9, 10, 9],
+  [0, 10, 0, 9, 0]
 ];
 
 seamCarving = new SeamCarving(maxArr);
 console.log(seamCarving.computeMaximumSeamEnergy());
 console.log(seamCarving.computeMaximumSeam());
+
+console.log(maxArr.map(i => i.slice(1,3)));
