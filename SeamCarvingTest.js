@@ -32,11 +32,9 @@ let SeamCarving = class {
     let backTrace = [];
     let bottomRow = seams[seams.length - 1];
     let node = this.findMinimumBackpointer(bottomRow);
-    console.log(node.energy + ' ' + node.current + ' ' + (seams.length - 1) + ' '  + node.xPointer);
     backTrace.push(new Point(node.current, seams.length - 1));
     for (let y = seams.length - 2; y >= 0; y--){
-      node = seams[y, node.xPointer];
-      console.log(node.energy + ' ' + node.current + ' ' + y + ' ' + node.xPointer);
+      node = seams[y][node.xPointer];
       backTrace.push(new Point(node.current, y));
     }
     return backTrace.reverse();
@@ -66,7 +64,6 @@ let SeamCarving = class {
       seamEnergies.push(seamEnergiesRow);
     }
 
-    console.log(seamEnergies);
     return this.getMinimumSeam(seamEnergies);
   }
 
@@ -92,9 +89,9 @@ let SeamCarving = class {
 
 const arr = [
   [9, 9, 0, 9, 9],
-  [9, 1, 9, 5, 9],
-  [9, 1, 9, 9, 0],
-  [9, 1, 9, 0, 9]
+  [9, 9, 9, 8, 9],
+  [9, 9, 9, 9, 0],
+  [9, 9, 9, 0, 9]
 ];
 
 const seamCarving = new SeamCarving(arr);
