@@ -1,5 +1,6 @@
 const hlt = require('./hlt');
-const { Direction } = require('./hlt/positionals');
+const { Position, Direction } = require('./hlt/positionals');
+const { EnergyMaximizer, MapConverter } = require('./EnergyMaximizer');
 const logging = require('./hlt/logging');
 
 const game = new hlt.Game();
@@ -15,6 +16,9 @@ game.initialize().then(async () => {
         await game.updateFrame();
 
         const { gameMap, me } = game;
+        const converter = new MapConverter();
+        let energies = converter.convertMap(gameMap);
+        logging.debug(energies);
 
         const commandQueue = [];
 
@@ -24,6 +28,17 @@ game.initialize().then(async () => {
             const safeMove = gameMap.naiveNavigate(ship, destination);
             commandQueue.push(ship.move(safeMove));
           }
+          else if (gameMap.get(ship.position).haliteAmount < hlt.constants.MAX_HALITE / 10) {
+            const direction = Direction.getAllCardinals()[Math.floor(4 * Math.random())];
+            const destination = ship.position.directionalOffset(direction);
+            const safeMove = gameMap.naiveNavigate(ship, destination);
+            commandQueue.push(ship.move(safeMove));
+          }
+        }
+
+        if (me.haliteAmount >= hlt.constants.SHIP_COST &&
+            !gameMap.get(me.shipyard).isOccupied) {
+            commandQueue.push(me.shipyard.spawn());
         }
 
         await game.endTurn(commandQueue);
