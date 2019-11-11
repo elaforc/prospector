@@ -1,5 +1,6 @@
 const hlt = require('./hlt');
 const { Position, Direction } = require('./hlt/positionals');
+const { GameMap } = require('./hlt/gameMap');
 const { EnergyMaximizer, MapConverter } = require('./EnergyMaximizer');
 const logging = require('./hlt/logging');
 
@@ -22,7 +23,6 @@ game.initialize().then(async () => {
         const energyMaximizer = new EnergyMaximizer(energies.map(
                                       i => i.slice(shipYardXPosition - 5, shipYardXPosition + 5)));
         let seam = energyMaximizer.computeMaximumSeam();
-        logging.debug(seam);
 
         const commandQueue = [];
 
@@ -33,9 +33,15 @@ game.initialize().then(async () => {
             commandQueue.push(ship.move(safeMove));
           }
           else if (gameMap.get(ship.position).haliteAmount < hlt.constants.MAX_HALITE / 10) {
-            const direction = Direction.getAllCardinals()[Math.floor(4 * Math.random())];
-            const destination = ship.position.directionalOffset(direction);
-            const safeMove = gameMap.naiveNavigate(ship, destination);
+            const source = ship.position;
+            //need to account for collisions and if a space has halite
+            const destination = energyMaximizer.findClosest(source, seam);
+            const [yDir, xDir] = GameMap._getTargetDirection(source, seam[destination]);
+            let safeMove;
+            if (yDir === null && xDir === null) { safeMove = Direction.Still; }
+            else if (yDir === null) { safeMove = xDir; }
+            else if (xDir === null) { safeMove = yDir; }
+            else { safeMove = yDir; }
             commandQueue.push(ship.move(safeMove));
           }
         }
