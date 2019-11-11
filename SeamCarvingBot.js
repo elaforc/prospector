@@ -4,6 +4,26 @@ const { GameMap } = require('./hlt/gameMap');
 const { EnergyMaximizer, MapConverter } = require('./EnergyMaximizer');
 const logging = require('./hlt/logging');
 
+function findClosestSafeMove(source, seam, gameMap){
+  let distance = 1000;
+  let pointer = 0;
+  for (let i = 0; i < seam.length; i++) {
+    let currentDistance = Math.abs(source.x - seam[i].x) + Math.abs(source.y - seam[i].y);
+    let seamPosition = new Position(seam[i].x, seam[i].y);
+    if (currentDistance == 0) {continue;}
+    else if (gameMap.get(seamPosition).haliteAmount < 50) {continue;}
+    else if (!gameMap.get(seamPosition).isEmpty) { continue; }
+    else if (currentDistance < distance) {
+      distance = currentDistance;
+      pointer = i;
+    }
+    else {
+      continue;
+    }
+  }
+  return pointer;
+}
+
 const game = new hlt.Game();
 game.initialize().then(async () => {
     // At this point "game" variable is populated with initial map data.
@@ -27,22 +47,25 @@ game.initialize().then(async () => {
         const commandQueue = [];
 
         for (const ship of me.getShips()) {
-          if (ship.haliteAmount > hlt.constants.MAX_HALITE / 2) {
+          if (ship.haliteAmount > hlt.constants.MAX_HALITE / 4) {
             const destination = me.shipyard.position;
             const safeMove = gameMap.naiveNavigate(ship, destination);
             commandQueue.push(ship.move(safeMove));
           }
           else if (gameMap.get(ship.position).haliteAmount < hlt.constants.MAX_HALITE / 10) {
             const source = ship.position;
-            //need to account for collisions and if a space has halite
-            const destination = energyMaximizer.findClosest(source, seam);
-            const [yDir, xDir] = GameMap._getTargetDirection(source, seam[destination]);
+            const destination = findClosestSafeMove(source, seam, gameMap);
+            let [yDir, xDir] = GameMap._getTargetDirection(source, seam[destination]);
             let safeMove;
             if (yDir === null && xDir === null) { safeMove = Direction.Still; }
             else if (yDir === null) { safeMove = xDir; }
             else if (xDir === null) { safeMove = yDir; }
-            else { safeMove = yDir; }
-            commandQueue.push(ship.move(safeMove));
+            else { safeMove = yDir; } //probably want to randomize xDir vs yDir to create some entropy or use the one that is safe
+            const targetPos = ship.position.directionalOffset(safeMove);
+            if (!gameMap.get(targetPos).isOccupied) {
+                gameMap.get(targetPos).markUnsafe(ship);
+                commandQueue.push(ship.move(safeMove));
+            }
           }
         }
 

@@ -87,19 +87,6 @@ let EnergyMaximizer = class {
     return this.getMaximumSeam(seamEnergies);
   }
 
-  findClosest(source, seam) {
-    let distance = 1000;
-    let pointer = 0;
-    for (let i = 0; i < seam.length; i++) {
-      let currentDistance = Math.abs(source.x - seam[i].x) + Math.abs(source.y - seam[i].y);
-      if (currentDistance != 0 && currentDistance < distance) {
-        distance = currentDistance;
-        pointer = i;
-      }
-    }
-
-    return pointer;
-  }
 }
 
 module.exports = {
