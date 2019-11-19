@@ -1,4 +1,5 @@
 const { Position } = require('./hlt/positionals');
+const logging = require('./hlt/logging');
 
 let MapConverter = class {
   convertMap(gameMap) {
@@ -48,14 +49,27 @@ let EnergyMaximizer = class {
     return current;
   }
 
+  //this method finds the max seam and also "removes"
+  //the max seam by 0ing out the elements
+  //this allows the method to be called multiple times to find
+  //a list of max seams without finding the same one over and
+  //over
   getMaximumSeam(seams) {
+    logging.debug(`seams: ${seams}`);
+    logging.debug(`seams length: ${seams.length}`);
     let backTrace = [];
     let bottomRow = seams[seams.length - 1];
+    logging.debug(`bottomRow: ${bottomRow}`);
     let node = this.findMaximumBackpointer(bottomRow);
+    logging.debug(`node: ${node}`);
     backTrace.push(new Point(node.current, seams.length - 1));
+    logging.debug(`set [${node.current},${seams.length - 1}] to 0`);
+    this.energies[node.current,seams.length - 1] = 0;
     for (let y = seams.length - 2; y >= 0; y--){
       node = seams[y][node.xPointer];
       backTrace.push(new Point(node.current, y));
+      this.energies[node.current, y] = 0;
+      logging.debug(`set [${node.current},${y}] to 0`);
     }
     return backTrace.reverse();
   }
@@ -63,6 +77,7 @@ let EnergyMaximizer = class {
   computeMaximumSeam() {
     let seamEnergies = [];
     let previousSeam = [];
+    logging.debug(`energies: ${this.energies}`);
     for(let i = 0; i < this.energies[0].length; i++) {
       previousSeam.push(new BackPointer(this.energies[0][i], null, i));
     }
