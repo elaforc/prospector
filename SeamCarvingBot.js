@@ -47,9 +47,9 @@ game.initialize().then(async () => {
         //need more than 1 to create some
         //entropy and get out of local maximums
         let seams = [];
-        for (let i = 0; i < 3; i++) {
+        //for (let i = 0; i < 3; i++) {
           seams.push(energyMaximizer.computeMaximumSeam());
-        } 
+        //} 
 
         const commandQueue = [];
 
@@ -61,23 +61,31 @@ game.initialize().then(async () => {
           }
           else if (gameMap.get(ship.position).haliteAmount < hlt.constants.MAX_HALITE / 10) {
             const source = ship.position;
-            const seamIndex = Math.floor(Math.random() * 3);
-            const destination = findClosestSafeMove(source, seams[seamIndex], gameMap);
-            let [yDir, xDir] = GameMap._getTargetDirection(source, seams[seamIndex][destination]);
-            let safeMove;
-            if (yDir === null && xDir === null) { safeMove = Direction.Still; }
-            else if (yDir === null) { safeMove = xDir; }
-            else if (xDir === null) { safeMove = yDir; }
-            else { Math.floor(Math.random() * 2) == 0 ? safeMove = yDir : safeMove = xDir; }
-            const targetPos = ship.position.directionalOffset(safeMove);
-            if (!gameMap.get(targetPos).isOccupied) {
-                gameMap.get(targetPos).markUnsafe(ship);
-                commandQueue.push(ship.move(safeMove));
+            const seamIndex = 0;//Math.floor(Math.random() * 3);
+            const entropy = Math.floor(Math.random() * 5);
+            if (entropy == 0) {
+              const destination = me.shipyard.position;
+              const safeMove = gameMap.naiveNavigate(ship, destination);
+              commandQueue.push(ship.move(safeMove));
+            }
+            else {
+              const destination = findClosestSafeMove(source, seams[seamIndex], gameMap);
+              let [yDir, xDir] = GameMap._getTargetDirection(source, seams[seamIndex][destination]);
+              let safeMove;
+              if (yDir === null && xDir === null) { safeMove = Direction.Still; }
+              else if (yDir === null) { safeMove = xDir; }
+              else if (xDir === null) { safeMove = yDir; }
+              else { Math.floor(Math.random() * 2) == 0 ? safeMove = yDir : safeMove = xDir; }
+              const targetPos = ship.position.directionalOffset(safeMove);
+              if (!gameMap.get(targetPos).isOccupied) {
+                  gameMap.get(targetPos).markUnsafe(ship);
+                  commandQueue.push(ship.move(safeMove));
+              }
             }
           }
         }
 
-        if (game.turnNumber < 0.75 * hlt.constants.MAX_TURNS &&
+        if (game.turnNumber < 0.65 * hlt.constants.MAX_TURNS &&
             me.haliteAmount >= hlt.constants.SHIP_COST &&
             !gameMap.get(me.shipyard).isOccupied) {
             commandQueue.push(me.shipyard.spawn());
