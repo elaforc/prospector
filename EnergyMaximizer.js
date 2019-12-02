@@ -55,21 +55,15 @@ let EnergyMaximizer = class {
   //a list of max seams without finding the same one over and
   //over
   getMaximumSeam(seams) {
-    logging.debug(`seams: ${seams}`);
-    logging.debug(`seams length: ${seams.length}`);
     let backTrace = [];
     let bottomRow = seams[seams.length - 1];
-    logging.debug(`bottomRow: ${bottomRow}`);
     let node = this.findMaximumBackpointer(bottomRow);
-    logging.debug(`node: ${node}`);
     backTrace.push(new Point(node.current, seams.length - 1));
-    logging.debug(`set [${node.current},${seams.length - 1}] to 0`);
     this.energies[node.current,seams.length - 1] = 0;
     for (let y = seams.length - 2; y >= 0; y--){
       node = seams[y][node.xPointer];
       backTrace.push(new Point(node.current, y));
-      this.energies[node.current, y] = 0;
-      logging.debug(`set [${node.current},${y}] to 0`);
+      this.energies[node.current][y] = 0;
     }
     return backTrace.reverse();
   }
@@ -77,19 +71,23 @@ let EnergyMaximizer = class {
   computeMaximumSeam() {
     let seamEnergies = [];
     let previousSeam = [];
-    logging.debug(`energies: ${this.energies}`);
     for(let i = 0; i < this.energies[0].length; i++) {
       previousSeam.push(new BackPointer(this.energies[0][i], null, i));
     }
     seamEnergies.push(previousSeam);
 
+    logging.debug(`length: ${this.energies.length}`);
     for (let i = 1; i < this.energies.length; i++) {
       let energiesRow = this.energies[i];
+      logging.debug(`energiesRow length: ${energiesRow.length}`);
 
       let seamEnergiesRow = [];
       for (let j = 0; j < energiesRow.length; j++) {
         const left = Math.max(j - 1, 0);
         const right = Math.min(j + 1, energiesRow.length - 1);
+        logging.debug(`seamEnergies: ${seamEnergies[i-1].length}`);
+        logging.debug(`left: ${left}`);
+        logging.debug(`right: ${right}`);
         const maxParent = this.findMaximumBackpointer(seamEnergies[i-1].slice(left, right + 1));
         const maxSeamEnergy = new BackPointer(energiesRow[j] + seamEnergies[i-1][maxParent.current].energy, 
                                                           maxParent.current, j);
