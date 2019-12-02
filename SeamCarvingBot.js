@@ -25,6 +25,8 @@ function findClosestSafeMove(source, seam, gameMap){
 }
 
 const game = new hlt.Game();
+let shipToConvert = -1;
+
 game.initialize().then(async () => {
     // At this point "game" variable is populated with initial map data.
     // This is a good place to do computationally expensive start-up pre-processing.
@@ -54,7 +56,16 @@ game.initialize().then(async () => {
         const commandQueue = [];
 
         for (const ship of me.getShips()) {
-          if (ship.haliteAmount > hlt.constants.MAX_HALITE / 2) {
+          logging.debug(`ship[${ship.id}].haliteAmount = ${ship.haliteAmount}`);
+          if (shipToConvert === -1) {
+            shipToConvert = ship.id;
+          }
+
+          else if (ship.id === shipToConvert && ship.haliteAmount > hlt.constants.DROPOFF_COST) {
+            logging.debug(`CONSTRUCT DROPOFF`);
+            ship.makeDropoff();
+          }
+          else if (ship.id !== shipToConvert && ship.haliteAmount > hlt.constants.MAX_HALITE / 2) {
             const destination = me.shipyard.position;
             const safeMove = gameMap.naiveNavigate(ship, destination);
             commandQueue.push(ship.move(safeMove));
