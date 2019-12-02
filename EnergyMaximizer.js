@@ -79,15 +79,11 @@ let EnergyMaximizer = class {
     logging.debug(`length: ${this.energies.length}`);
     for (let i = 1; i < this.energies.length; i++) {
       let energiesRow = this.energies[i];
-      logging.debug(`energiesRow length: ${energiesRow.length}`);
 
       let seamEnergiesRow = [];
-      for (let j = 0; j < energiesRow.length; j++) {
+      for (let j = 0; j < seamEnergies[i-1].length; j++) {
         const left = Math.max(j - 1, 0);
-        const right = Math.min(j + 1, energiesRow.length - 1);
-        logging.debug(`seamEnergies: ${seamEnergies[i-1].length}`);
-        logging.debug(`left: ${left}`);
-        logging.debug(`right: ${right}`);
+        const right = Math.min(j + 1, seamEnergies[i-1].length - 1);
         const maxParent = this.findMaximumBackpointer(seamEnergies[i-1].slice(left, right + 1));
         const maxSeamEnergy = new BackPointer(energiesRow[j] + seamEnergies[i-1][maxParent.current].energy, 
                                                           maxParent.current, j);

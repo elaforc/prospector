@@ -120,9 +120,9 @@ let SeamCarving = class {
       let energiesRow = this.energies[i];
 
       let seamEnergiesRow = [];
-      for (let j = 0; j < energiesRow.length; j++) {
+      for (let j = 0; j < seamEnergies[i-1].length; j++) {
         const left = Math.max(j - 1, 0);
-        const right = Math.min(j + 1, energiesRow.length - 1);
+        const right = Math.min(j + 1, seamEnergies[i-1].length - 1);
         const maxParent = this.findMaximumBackpointer(seamEnergies[i-1].slice(left, right + 1));
         const maxSeamEnergy = new SeamCarvingBackPointer(energiesRow[j] + seamEnergies[i-1][maxParent.current].energy, 
                                                           maxParent.current, j);

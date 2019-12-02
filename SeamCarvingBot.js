@@ -11,7 +11,7 @@ function findClosestSafeMove(source, seam, gameMap){
     let currentDistance = Math.abs(source.x - seam[i].x) + Math.abs(source.y - seam[i].y);
     let seamPosition = new Position(seam[i].x, seam[i].y);
     if (currentDistance == 0) {continue;}
-    else if (gameMap.get(seamPosition).haliteAmount < 50) {continue;}
+    else if (gameMap.get(seamPosition).haliteAmount < 100) {continue;}
     else if (!gameMap.get(seamPosition).isEmpty) { continue; }
     else if (currentDistance < distance) {
       distance = currentDistance;
@@ -59,7 +59,7 @@ game.initialize().then(async () => {
             const safeMove = gameMap.naiveNavigate(ship, destination);
             commandQueue.push(ship.move(safeMove));
           }
-          else if (gameMap.get(ship.position).haliteAmount < hlt.constants.MAX_HALITE / 2) {
+          else if (gameMap.get(ship.position).haliteAmount < hlt.constants.MAX_HALITE / 10) {
             const source = ship.position;
             const seamIndex = Math.floor(Math.random() * 3);
             const destination = findClosestSafeMove(source, seams[seamIndex], gameMap);
@@ -77,7 +77,8 @@ game.initialize().then(async () => {
           }
         }
 
-        if (me.haliteAmount >= hlt.constants.SHIP_COST &&
+        if (game.turnNumber < 0.75 * hlt.constants.MAX_TURNS &&
+            me.haliteAmount >= hlt.constants.SHIP_COST &&
             !gameMap.get(me.shipyard).isOccupied) {
             commandQueue.push(me.shipyard.spawn());
         }
