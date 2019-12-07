@@ -124,10 +124,11 @@ game.initialize().then(async () => {
         //this is an important tuning mechanism
         //stop spending halite if we are approaching
         //the end of the game or if we don't have enough
-        //halite to make one. Also adding one to see if making
+        //halite to make one. Also adding a parameter to see if making
         //a new dropoff would help
         if (game.turnNumber < 0.65 * hlt.constants.MAX_TURNS &&
             me.haliteAmount >= hlt.constants.SHIP_COST &&
+            me.getShips().length < 7 &&
             !gameMap.get(me.shipyard).isOccupied) {
             commandQueue.push(me.shipyard.spawn());
         }
