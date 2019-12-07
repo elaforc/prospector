@@ -3,6 +3,7 @@ const { Position, Direction } = require('./hlt/positionals');
 const { GameMap } = require('./hlt/gameMap');
 const { EnergyMaximizer, MapConverter } = require('./EnergyMaximizer');
 const logging = require('./hlt/logging');
+const constants = require('./constants');
 
 //this function is used to find the closest **VIABLE**
 //game map position within the seam to the 
@@ -54,7 +55,7 @@ game.initialize().then(async () => {
         //need more than 1 to create some
         //entropy and get out of local maximums
         let seams = [];
-        for (let i = 0; i < 5; i++) {
+        for (let i = 0; i < constants.NUMBER_OF_SEAMS; i++) {
           seams.push(energyMaximizer.computeMaximumSeam());
         } 
 
@@ -63,7 +64,7 @@ game.initialize().then(async () => {
 
         //create a dropoff under the right conditions
         if (game.turnNumber > 20 &&
-            game.turnNumber < 0.65 * hlt.constants.MAX_TURNS &&
+            game.turnNumber < (constants.STOP_BUILDING_TURN / 100) * hlt.constants.MAX_TURNS &&
             me.haliteAmount >= hlt.constants.DROPOFF_COST &&
             me.getShips().length > 0 &&
             me.getDropoffs().length < 1) {
@@ -148,7 +149,7 @@ game.initialize().then(async () => {
         //the end of the game or if we don't have enough
         //halite to make one. Also adding a parameter to see if making
         //less ships helps (so can make dropoff)
-        if (game.turnNumber < 0.65 * hlt.constants.MAX_TURNS &&
+        if (game.turnNumber < (constants.STOP_BUILDING_TURN / 100) * hlt.constants.MAX_TURNS &&
             me.haliteAmount >= hlt.constants.SHIP_COST &&
             me.getShips().length < 7 &&
             !gameMap.get(me.shipyard).isOccupied) {
