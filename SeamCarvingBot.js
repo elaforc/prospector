@@ -45,13 +45,13 @@ game.initialize().then(async () => {
         const converter = new MapConverter();
         let energies = converter.convertMap(gameMap);
         const shipYardXPosition = me.shipyard.position.x;
-        //note only do 8 on each size because of what is a reasonable
+        //note only do SEARCH_AREA on each size because of what is a reasonable
         //space for the ships to try and get too in time, but this maybe worth
         //expanding as a tuning mechanism.
         const energyMaximizer = new EnergyMaximizer(energies.map(
-                                      i => i.slice(Math.max(shipYardXPosition - 8, 0), 
-                                                   Math.min(shipYardXPosition + 8, gameMap.height))));
-        //find the 5 energy laden seams
+                                      i => i.slice(Math.max(shipYardXPosition - constants.SEARCH_AREA, 0), 
+                                                   Math.min(shipYardXPosition + constants.SEARCH_AREA, gameMap.height))));
+        //find X energy laden seams
         //need more than 1 to create some
         //entropy and get out of local maximums
         let seams = [];
@@ -63,11 +63,12 @@ game.initialize().then(async () => {
         let dropOffId = -1;
 
         //create a dropoff under the right conditions
-        if (game.turnNumber > 20 &&
+        //assumes only one dropoff is made at the moment
+        if (game.turnNumber > constants.START_DROPOFF_TURN &&
             game.turnNumber < (constants.STOP_BUILDING_TURN / 100) * hlt.constants.MAX_TURNS &&
             me.haliteAmount >= hlt.constants.DROPOFF_COST &&
             me.getShips().length > 0 &&
-            me.getDropoffs().length < 1) {
+            me.getDropoffs().length < constants.MAXIMUM_NUM_DROPOFFS) {
               let distance = 0;
               for (const ship of me.getShips()) {
                 if (gameMap.calculateDistance(me.shipyard.position, ship.position) > distance) {
@@ -79,10 +80,9 @@ game.initialize().then(async () => {
         }
 
         for (const ship of me.getShips()) {
-          logging.debug(`ship[${ship.id}].haliteAmount = ${ship.haliteAmount}`);
           // if ship is getting close to full
           // go back to shipyard to drop off halite
-          if (ship.id !== dropOffId && ship.haliteAmount > hlt.constants.MAX_HALITE / 2) {
+          if (ship.id !== dropOffId && ship.haliteAmount > hlt.constants.MAX_HALITE * (constants.RETREAT_PERCENTAGE / 100)) {
             let shipyardDistance = gameMap.calculateDistance(me.shipyard.position, ship.position);
             let dropOffDistance = 100000;
             if (me.getDropoffs().length > 0) {
@@ -95,10 +95,10 @@ game.initialize().then(async () => {
 
           // if the ships current position has less than
           // X halite should go looking elsewhere for more
-          else if (ship.id !== dropOffId && gameMap.get(ship.position).haliteAmount < hlt.constants.MAX_HALITE / 10) {
+          else if (ship.id !== dropOffId && gameMap.get(ship.position).haliteAmount < hlt.constants.MAX_HALITE * (constants.GET_MOVING_PERCENTAGE / 100)) {
             const source = ship.position;
-            const seamIndex = Math.floor(Math.random() * 5);
-            const entropy = Math.floor(Math.random() * 5);
+            const seamIndex = Math.floor(Math.random() * constants.NUMBER_OF_SEAMS);
+            const entropy = Math.floor(Math.random() * constants.ENTROPY);
 
             // added a periodic randomness to get out of local maximums
             if (entropy == 0) {
@@ -111,10 +111,7 @@ game.initialize().then(async () => {
             //energy seam
             else {
               let destination = findClosestSafeMove(source, seams[seamIndex], gameMap);
-              logging.debug(`ship[${ship.id}] destination = ${seams[seamIndex][destination]}`);
               let [yDir, xDir] = GameMap._getTargetDirection(source, seams[seamIndex][destination]);
-              logging.debug(`ship[${ship.id}] xDir = ${xDir}`);
-              logging.debug(`ship[${ship.id}] yDir = ${yDir}`);
 
               let safeMove;
               if (yDir === null && xDir === null) { safeMove = Direction.Still; }
@@ -122,14 +119,11 @@ game.initialize().then(async () => {
               else if (xDir === null) { safeMove = yDir; }
               else { Math.floor(Math.random() * 2) === 0 ? safeMove = yDir : safeMove = xDir; }
               let targetPos = ship.position.directionalOffset(safeMove);
-              logging.debug(`ship[${ship.id}] targetPos = ${targetPos}`);
               if (!gameMap.get(targetPos).isOccupied) {
-                logging.debug(`ship[${ship.id}] moving to ${targetPos}`);
                 gameMap.get(targetPos).markUnsafe(ship);
                 commandQueue.push(ship.move(safeMove));
               }
               else { //if target is occupied, just go a random way
-                logging.debug(`gameMap[${targetPos.x}, ${targetPos.y}] is occupied by ${gameMap.get(targetPos).ship}`);
                 let direction = Direction.getAllCardinals()[Math.floor(4 * Math.random())];
                 destination = ship.position.directionalOffset(direction);
                 safeMove = gameMap.naiveNavigate(ship, destination);
@@ -151,7 +145,7 @@ game.initialize().then(async () => {
         //less ships helps (so can make dropoff)
         if (game.turnNumber < (constants.STOP_BUILDING_TURN / 100) * hlt.constants.MAX_TURNS &&
             me.haliteAmount >= hlt.constants.SHIP_COST &&
-            me.getShips().length < 7 &&
+            me.getShips().length < constants.NUMBER_OF_SHIPS &&
             !gameMap.get(me.shipyard).isOccupied) {
             commandQueue.push(me.shipyard.spawn());
         }
