@@ -76,7 +76,6 @@ let EnergyMaximizer = class {
     }
     seamEnergies.push(previousSeam);
 
-    logging.debug(`length: ${this.energies.length}`);
     for (let i = 1; i < this.energies.length; i++) {
       let energiesRow = this.energies[i];
 
