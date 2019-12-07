@@ -82,7 +82,12 @@ game.initialize().then(async () => {
           // if ship is getting close to full
           // go back to shipyard to drop off halite
           if (ship.id !== dropOffId && ship.haliteAmount > hlt.constants.MAX_HALITE / 2) {
-            const destination = me.shipyard.position;
+            let shipyardDistance = gameMap.calculateDistance(me.shipyard.position, ship.position);
+            let dropOffDistance = 100000;
+            if (me.getDropoffs().length > 0) {
+              dropOffDistance = gameMap.calculateDistance(me.getDropoffs()[0].position, ship.position);
+            }
+            const destination = shipyardDistance < dropOffDistance ? me.shipyard.position : me.getDropoffs()[0].position;
             const safeMove = gameMap.naiveNavigate(ship, destination);
             commandQueue.push(ship.move(safeMove));
           }
