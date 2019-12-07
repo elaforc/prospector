@@ -61,14 +61,20 @@ game.initialize().then(async () => {
         const commandQueue = [];
         let dropOffId = -1;
 
+        //create a dropoff under the right conditions
         if (game.turnNumber > 20 &&
             game.turnNumber < 0.65 * hlt.constants.MAX_TURNS &&
             me.haliteAmount >= hlt.constants.DROPOFF_COST &&
             me.getShips().length > 0 &&
             me.getDropoffs().length < 1) {
-              logging.debug(`MAKING DROPOFF`);
-              dropOffId = me.getShips()[0].id;
-              commandQueue.push(me.getShips()[0].makeDropoff());
+              let distance = 0;
+              for (const ship of me.getShips()) {
+                if (gameMap.calculateDistance(me.shipyard.position, ship.position) > distance) {
+                  dropOffId = ship.id;
+                  distance = gameMap.calculateDistance(me.shipyard.position, ship.position);
+                }
+              }
+              commandQueue.push(me.getShip(dropOffId).makeDropoff());
         }
 
         for (const ship of me.getShips()) {
@@ -136,7 +142,7 @@ game.initialize().then(async () => {
         //stop spending halite if we are approaching
         //the end of the game or if we don't have enough
         //halite to make one. Also adding a parameter to see if making
-        //a new dropoff would help
+        //less ships helps (so can make dropoff)
         if (game.turnNumber < 0.65 * hlt.constants.MAX_TURNS &&
             me.haliteAmount >= hlt.constants.SHIP_COST &&
             me.getShips().length < 7 &&
