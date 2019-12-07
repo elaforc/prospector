@@ -59,12 +59,23 @@ game.initialize().then(async () => {
         } 
 
         const commandQueue = [];
+        let dropOffId = -1;
+
+        if (game.turnNumber > 20 &&
+            game.turnNumber < 0.65 * hlt.constants.MAX_TURNS &&
+            me.haliteAmount >= hlt.constants.DROPOFF_COST &&
+            me.getShips().length > 0 &&
+            me.getDropoffs().length < 1) {
+              logging.debug(`MAKING DROPOFF`);
+              dropOffId = me.getShips()[0].id;
+              commandQueue.push(me.getShips()[0].makeDropoff());
+        }
 
         for (const ship of me.getShips()) {
           logging.debug(`ship[${ship.id}].haliteAmount = ${ship.haliteAmount}`);
           // if ship is getting close to full
           // go back to shipyard to drop off halite
-          if (ship.haliteAmount > hlt.constants.MAX_HALITE / 2) {
+          if (ship.id !== dropOffId && ship.haliteAmount > hlt.constants.MAX_HALITE / 2) {
             const destination = me.shipyard.position;
             const safeMove = gameMap.naiveNavigate(ship, destination);
             commandQueue.push(ship.move(safeMove));
@@ -72,7 +83,7 @@ game.initialize().then(async () => {
 
           // if the ships current position has less than
           // X halite should go looking elsewhere for more
-          else if (gameMap.get(ship.position).haliteAmount < hlt.constants.MAX_HALITE / 10) {
+          else if (ship.id !== dropOffId && gameMap.get(ship.position).haliteAmount < hlt.constants.MAX_HALITE / 10) {
             const source = ship.position;
             const seamIndex = Math.floor(Math.random() * 5);
             const entropy = Math.floor(Math.random() * 5);
