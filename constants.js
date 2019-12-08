@@ -16,7 +16,7 @@ module.exports = {
      * game will just focus on collecting halite with
      * the entities it has.
      */
-    STOP_BUILDING_TURN: 65,
+    STOP_BUILDING_TURN: 75,
     /**
      * The turn number to start considering
      * building a dropoff. If built too soon the dropoff
@@ -31,7 +31,7 @@ module.exports = {
      * What percentage of maximum capacity should a ship
      * go back to drop off halite
      */
-    RETREAT_PERCENTAGE: 50,
+    RETREAT_PERCENTAGE: 80,
     /**
      * What percentage of halite remaining should a ship
      * decide to move on to another cell in the map
