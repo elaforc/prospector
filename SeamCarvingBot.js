@@ -3,6 +3,7 @@ const { Position, Direction } = require('./hlt/positionals');
 const { GameMap } = require('./hlt/gameMap');
 const { DropOffCreator } = require('./DropOffCreator');
 const { SeamGenerator } = require('./SeamGenerator');
+const { Retreater } = require('./Retreater');
 const logging = require('./hlt/logging');
 const constants = require('./constants');
 
@@ -46,6 +47,7 @@ game.initialize().then(async () => {
         const commandQueue = [];
         const dropOffCreator = new DropOffCreator();
         const seamGenerator = new SeamGenerator();
+        const retreater = new Retreater();
         let seams = [];
         let dropOffId = -1;
 
@@ -65,15 +67,8 @@ game.initialize().then(async () => {
         for (const ship of me.getShips()) {
           // if ship is getting close to full
           // go back to shipyard to drop off halite
-          if (ship.id !== dropOffId && ship.haliteAmount > hlt.constants.MAX_HALITE * (constants.RETREAT_PERCENTAGE / 100)) {
-            let shipyardDistance = gameMap.calculateDistance(me.shipyard.position, ship.position);
-            let dropOffDistance = 100000;
-            if (me.getDropoffs().length > 0) {
-              dropOffDistance = gameMap.calculateDistance(me.getDropoffs()[0].position, ship.position);
-            }
-            const destination = shipyardDistance < dropOffDistance ? me.shipyard.position : me.getDropoffs()[0].position;
-            const safeMove = gameMap.naiveNavigate(ship, destination);
-            commandQueue.push(ship.move(safeMove));
+          if (retreater.shouldReturnToBase(ship, dropOffId)) {
+            commandQueue.push(retreater.retreat(gameMap, me, ship));
           }
 
           // if the ships current position has less than

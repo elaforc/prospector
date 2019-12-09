@@ -21,5 +21,5 @@ let SeamGenerator = class {
 }
 
 module.exports = {
-    SeamGenerator
+  SeamGenerator
 };
