@@ -25,5 +25,5 @@ let DropOffCreator = class {
 }
 
 module.exports = {
-    DropOffCreator
+  DropOffCreator
 };

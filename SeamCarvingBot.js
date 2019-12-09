@@ -1,34 +1,12 @@
-const hlt = require('./hlt');
-const { Position, Direction } = require('./hlt/positionals');
-const { GameMap } = require('./hlt/gameMap');
 const { DropOffCreator } = require('./DropOffCreator');
 const { SeamGenerator } = require('./SeamGenerator');
 const { Retreater } = require('./Retreater');
+const { Miner } = require('./Miner');
+const { ShipCreator } = require('./ShipCreator');
+
+const hlt = require('./hlt');
 const logging = require('./hlt/logging');
 const constants = require('./constants');
-
-//this function is used to find the closest **VIABLE**
-//game map position within the seam to the 
-//given ship (source)
-function findClosestSafeMove(source, seam, gameMap){
-  let distance = 1000;
-  let pointer = 0;
-  for (let i = 0; i < seam.length; i++) {
-    let currentDistance = Math.abs(source.x - seam[i].x) + Math.abs(source.y - seam[i].y); //basic cartesian distance function
-    let seamPosition = new Position(seam[i].x, seam[i].y);
-    if (currentDistance == 0) {continue;} //if the same position, do nothing
-    else if (gameMap.get(seamPosition).haliteAmount < 100) {continue;} //if the position has a small amount of halite
-    else if (!gameMap.get(seamPosition).isEmpty) { continue; } //collision detection
-    else if (currentDistance < distance) {
-      distance = currentDistance;
-      pointer = i;
-    }
-    else {
-      continue; //if the position is farther away than the best current pointer
-    }
-  }
-  return pointer;
-}
 
 const game = new hlt.Game();
 
@@ -46,8 +24,10 @@ game.initialize().then(async () => {
         const { gameMap, me } = game;
         const commandQueue = [];
         const dropOffCreator = new DropOffCreator();
+        const shipCreator = new ShipCreator();
         const seamGenerator = new SeamGenerator();
         const retreater = new Retreater();
+        const miner = new Miner();
         let seams = [];
         let dropOffId = -1;
 
@@ -73,9 +53,7 @@ game.initialize().then(async () => {
 
           // if the ships current position has less than
           // X halite should go looking elsewhere for more
-          else if (ship.id !== dropOffId && gameMap.get(ship.position).haliteAmount < hlt.constants.MAX_HALITE * (constants.GET_MOVING_PERCENTAGE / 100)) {
-            const source = ship.position;
-            const seamIndex = Math.floor(Math.random() * constants.NUMBER_OF_SEAMS);
+          else if (miner.shouldMoveToAnotherLocation(ship, dropOffId, gameMap)) {
             const entropy = Math.floor(Math.random() * constants.ENTROPY);
 
             // added a periodic randomness to get out of local maximums
@@ -85,28 +63,9 @@ game.initialize().then(async () => {
               commandQueue.push(ship.move(safeMove));
             }
 
-            //find the best next position on the most maximized
-            //energy seam
+            //find the best next position on the most maximized energy seam
             else {
-              let destination = findClosestSafeMove(source, seams[seamIndex], gameMap);
-              let [yDir, xDir] = GameMap._getTargetDirection(source, seams[seamIndex][destination]);
-
-              let safeMove;
-              if (yDir === null && xDir === null) { safeMove = Direction.Still; }
-              else if (yDir === null) { safeMove = xDir; }
-              else if (xDir === null) { safeMove = yDir; }
-              else { Math.floor(Math.random() * 2) === 0 ? safeMove = yDir : safeMove = xDir; }
-              let targetPos = ship.position.directionalOffset(safeMove);
-              if (!gameMap.get(targetPos).isOccupied) {
-                gameMap.get(targetPos).markUnsafe(ship);
-                commandQueue.push(ship.move(safeMove));
-              }
-              else { //if target is occupied, just go a random way
-                let direction = Direction.getAllCardinals()[Math.floor(4 * Math.random())];
-                destination = ship.position.directionalOffset(direction);
-                safeMove = gameMap.naiveNavigate(ship, destination);
-                commandQueue.push(ship.move(safeMove));
-              }
+              commandQueue.push(miner.navigate(gameMap, ship, seams));
             }
           }
 
@@ -121,11 +80,8 @@ game.initialize().then(async () => {
         //the end of the game or if we don't have enough
         //halite to make one. Also adding a parameter to see if making
         //less ships helps (so can make dropoff)
-        if (game.turnNumber < (constants.STOP_BUILDING_TURN / 100) * hlt.constants.MAX_TURNS &&
-            me.haliteAmount >= hlt.constants.SHIP_COST &&
-            me.getShips().length < constants.NUMBER_OF_SHIPS &&
-            !gameMap.get(me.shipyard).isOccupied) {
-            commandQueue.push(me.shipyard.spawn());
+        if (shipCreator.shouldCreateShip(game, me, gameMap)) {
+            commandQueue.push(shipCreator.makeShip(me));
         }
 
         await game.endTurn(commandQueue);
