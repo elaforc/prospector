@@ -11,9 +11,6 @@ const constants = require('./constants');
 const game = new hlt.Game();
 
 game.initialize().then(async () => {
-    // At this point "game" variable is populated with initial map data.
-    // This is a good place to do computationally expensive start-up pre-processing.
-    // As soon as you call "ready" function below, the 2 second per turn timer will start.
     await game.ready('TeamEric');
 
     logging.info(`My Player ID is ${game.myId}.`);
@@ -29,14 +26,12 @@ game.initialize().then(async () => {
         const retreater = new Retreater();
         const miner = new Miner();
         let seams = [];
-        let dropOffId = -1;
+        let dropOffId = -1; //used to ensure ship doesn't get two commands
 
-        //find X energy laden seams
-        //need more than 1 to create some
-        //entropy and get out of local maximums
+        //find muliple energy laden seams within the game map
+        //need more than 1 to create entropy and get out of local maximums
         seamGenerator.generateTopSeams(gameMap, me, seams);
 
-        //create a dropoff under the right conditions
         //assumes only one dropoff is made at the moment
         if (dropOffCreator.shouldCreateDropOff(game, me)) {
           let obj = dropOffCreator.makeDropOff(gameMap, me)
@@ -44,19 +39,21 @@ game.initialize().then(async () => {
           commandQueue.push(obj.command);
         }
 
+        //every game turn we should tell every ship what to do
         for (const ship of me.getShips()) {
-          // if ship is getting close to full
-          // go back to shipyard to drop off halite
+
+          // if ship is getting close to full capacity
+          // retreat to nearest drop off location
           if (retreater.shouldReturnToBase(ship, dropOffId)) {
             commandQueue.push(retreater.retreat(gameMap, me, ship));
           }
 
-          // if the ships current position has less than
-          // X halite should go looking elsewhere for more
+          // if the ships current game position has too little halite
+          // should go to the nearest maximum seam location
           else if (miner.shouldMoveToAnotherLocation(ship, dropOffId, gameMap)) {
             const entropy = Math.floor(Math.random() * constants.ENTROPY);
 
-            // added a periodic randomness to get out of local maximums
+            // added periodic randomness to get out of local maximums
             if (entropy == 0) {
               const destination = me.shipyard.position;
               const safeMove = gameMap.naiveNavigate(ship, destination);
@@ -69,17 +66,13 @@ game.initialize().then(async () => {
             }
           }
 
-          // there is an implicit else here that says
-          // if it isn't time to go back and the ships 
-          // current position has enough halite then just
-          // hang around collecting halite
+          // there is an implicit else here that says if it isn't time to go 
+          // back and the ships current position has enough halite then just
+          // stay still collecting halite
         }
 
-        //this is an important tuning mechanism
-        //stop spending halite if we are approaching
-        //the end of the game or if we don't have enough
-        //halite to make one. Also adding a parameter to see if making
-        //less ships helps (so can make dropoff)
+        // this is an important turning mechanism. We should not just create 
+        // ships just because we have enough halite to do so
         if (shipCreator.shouldCreateShip(game, me, gameMap)) {
             commandQueue.push(shipCreator.makeShip(me));
         }
