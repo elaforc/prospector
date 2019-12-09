@@ -1,7 +1,8 @@
 const hlt = require('./hlt');
 const { Position, Direction } = require('./hlt/positionals');
 const { GameMap } = require('./hlt/gameMap');
-const { EnergyMaximizer, MapConverter } = require('./EnergyMaximizer');
+const { DropOffCreator } = require('./DropOffCreator');
+const { SeamGenerator } = require('./SeamGenerator');
 const logging = require('./hlt/logging');
 const constants = require('./constants');
 
@@ -42,41 +43,23 @@ game.initialize().then(async () => {
         await game.updateFrame();
 
         const { gameMap, me } = game;
-        const converter = new MapConverter();
-        let energies = converter.convertMap(gameMap);
-        const shipYardXPosition = me.shipyard.position.x;
-        //note only do SEARCH_AREA on each size because of what is a reasonable
-        //space for the ships to try and get too in time, but this maybe worth
-        //expanding as a tuning mechanism.
-        const energyMaximizer = new EnergyMaximizer(energies.map(
-                                      i => i.slice(Math.max(shipYardXPosition - constants.SEARCH_AREA, 0), 
-                                                   Math.min(shipYardXPosition + constants.SEARCH_AREA, gameMap.height))));
+        const commandQueue = [];
+        const dropOffCreator = new DropOffCreator();
+        const seamGenerator = new SeamGenerator();
+        let seams = [];
+        let dropOffId = -1;
+
         //find X energy laden seams
         //need more than 1 to create some
         //entropy and get out of local maximums
-        let seams = [];
-        for (let i = 0; i < constants.NUMBER_OF_SEAMS; i++) {
-          seams.push(energyMaximizer.computeMaximumSeam());
-        } 
-
-        const commandQueue = [];
-        let dropOffId = -1;
+        seamGenerator.generateTopSeams(gameMap, me, seams);
 
         //create a dropoff under the right conditions
         //assumes only one dropoff is made at the moment
-        if (game.turnNumber > constants.START_DROPOFF_TURN &&
-            game.turnNumber < (constants.STOP_BUILDING_TURN / 100) * hlt.constants.MAX_TURNS &&
-            me.haliteAmount >= hlt.constants.DROPOFF_COST &&
-            me.getShips().length > 0 &&
-            me.getDropoffs().length < constants.MAXIMUM_NUM_DROPOFFS) {
-              let distance = 0;
-              for (const ship of me.getShips()) {
-                if (gameMap.calculateDistance(me.shipyard.position, ship.position) > distance) {
-                  dropOffId = ship.id;
-                  distance = gameMap.calculateDistance(me.shipyard.position, ship.position);
-                }
-              }
-              commandQueue.push(me.getShip(dropOffId).makeDropoff());
+        if (dropOffCreator.shouldCreateDropOff(game, me)) {
+          let obj = dropOffCreator.makeDropOff(gameMap, me)
+          dropOffId = obj.dropOffId;
+          commandQueue.push(obj.command);
         }
 
         for (const ship of me.getShips()) {
