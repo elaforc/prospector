@@ -34,7 +34,7 @@ let BackPointer = class {
   }
 }
 
-let EnergyMaximizer = class {
+let Miner = class {
   constructor(map) {
     this.energies = map;
   }
@@ -98,6 +98,6 @@ let EnergyMaximizer = class {
 }
 
 module.exports = {
-    EnergyMaximizer,
+    Miner,
     MapConverter
 };

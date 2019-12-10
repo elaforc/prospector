@@ -1,16 +1,16 @@
 const hlt = require('./hlt');
 const constants = require('./constants');
-const { EnergyMaximizer, MapConverter } = require('./EnergyMaximizer');
+const { Miner, MapConverter } = require('./Miner');
 
 let SeamGenerator = class {
   generateTopSeams(gameMap, player, seams) {
     const converter = new MapConverter();
     let energies = converter.convertMap(gameMap);
 
-    const energyMaximizer = new EnergyMaximizer(energies);
+    const miner = new Miner(energies);
     
     for (let i = 0; i < constants.NUMBER_OF_SEAMS; i++) {
-      seams.push(energyMaximizer.computeMaximumSeam());
+      seams.push(miner.computeMaximumSeam());
     }
   }
 }
