@@ -1,6 +1,7 @@
 const { DropOffCreator } = require('./DropOffCreator');
 const { Foreman } = require('./Foreman');
 const { Retreater } = require('./Retreater');
+const { Kamikaze } = require('./Kamikaze');
 const { Prospector } = require('./Prospector');
 const { ShipCreator } = require('./ShipCreator');
 
@@ -24,6 +25,7 @@ game.initialize().then(async () => {
         const shipCreator = new ShipCreator();
         const foreman = new Foreman();
         const retreater = new Retreater();
+        const kamikaze = new Kamikaze();
         const prospector = new Prospector();
         let seams = [];
         let dropOffId = -1; //used to ensure ship doesn't get two commands
@@ -42,9 +44,15 @@ game.initialize().then(async () => {
         //every game turn we should tell every ship what to do
         for (const ship of me.getShips()) {
 
+          // if ship has dropped off its halite for the final time
+          // it should self destruct to make room for other ships
+          if (kamikaze.shouldDestroyItself(game, ship)) {
+            commandQueue.push(kamikaze.destroy(ship, gameMap));
+          }
+
           // if ship is getting close to full capacity
           // retreat to nearest drop off location
-          if (retreater.shouldReturnToBase(ship, dropOffId, game)) {
+          else if (retreater.shouldReturnToBase(ship, dropOffId, game)) {
             commandQueue.push(retreater.retreat(gameMap, me, ship));
           }
 
