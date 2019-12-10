@@ -42,7 +42,7 @@ module.exports = {
      * Number of ships to build before focusing on gathering
      * halite
      */
-    NUMBER_OF_SHIPS: 25,
+    NUMBER_OF_SHIPS: 16,
     /**
      * Amount of halite a cell should have in it to consider
      * going there
