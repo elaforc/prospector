@@ -25,7 +25,7 @@ module.exports = {
      * What percentage of maximum capacity should a ship
      * go back to drop off halite
      */
-    RETREAT_PERCENTAGE: 70,
+    RETREAT_PERCENTAGE: 85,
     /**
      * What percentage of halite remaining should a ship
      * decide to move on to another cell in the map
@@ -42,7 +42,7 @@ module.exports = {
      * Number of ships to build before focusing on gathering
      * halite
      */
-    NUMBER_OF_SHIPS: 7,
+    NUMBER_OF_SHIPS: 15,
     /**
      * Amount of halite a cell should have in it to consider
      * going there
