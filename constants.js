@@ -3,13 +3,7 @@ module.exports = {
      * Number of seams to select from when choosing a path
      * The larger the number, the more random the possibilities
      */
-    NUMBER_OF_SEAMS: 5,
-    /**
-     * The size of grid to seach for maximum seams
-     * The larger the size, the farther away from the
-     * shipyard a ship must go to find energy
-     */
-    SEARCH_AREA: 8,
+    NUMBER_OF_SEAMS: 10,
     /**
      * What percentage of the game to stop building
      * entities. After this percentage is hit the 
@@ -36,7 +30,7 @@ module.exports = {
      * What percentage of halite remaining should a ship
      * decide to move on to another cell in the map
      */
-    GET_MOVING_PERCENTAGE: 10,
+    GET_MOVING_PERCENTAGE: 5,
     /**
      * What percentage of the time should a ship choose
      * a random direction instead of trying to follow the 
