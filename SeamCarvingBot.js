@@ -1,7 +1,7 @@
 const { DropOffCreator } = require('./DropOffCreator');
 const { SeamGenerator } = require('./SeamGenerator');
 const { Retreater } = require('./Retreater');
-const { Miner } = require('./Miner');
+const { Prospector } = require('./Prospector');
 const { ShipCreator } = require('./ShipCreator');
 
 const hlt = require('./hlt');
@@ -24,7 +24,7 @@ game.initialize().then(async () => {
         const shipCreator = new ShipCreator();
         const seamGenerator = new SeamGenerator();
         const retreater = new Retreater();
-        const miner = new Miner();
+        const prospector = new Prospector();
         let seams = [];
         let dropOffId = -1; //used to ensure ship doesn't get two commands
 
@@ -50,7 +50,7 @@ game.initialize().then(async () => {
 
           // if the ships current game position has too little halite
           // should go to the nearest maximum seam location
-          else if (miner.shouldMoveToAnotherLocation(ship, dropOffId, gameMap)) {
+          else if (prospector.shouldMoveToAnotherLocation(ship, dropOffId, gameMap)) {
             const entropy = Math.floor(Math.random() * constants.ENTROPY);
 
             // added periodic randomness to get out of local maximums
@@ -62,7 +62,7 @@ game.initialize().then(async () => {
 
             //find the best next position on the most maximized energy seam
             else {
-              commandQueue.push(miner.navigate(gameMap, ship, seams));
+              commandQueue.push(prospector.navigate(gameMap, ship, seams));
             }
           }
 

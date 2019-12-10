@@ -3,7 +3,7 @@ const { GameMap } = require('./hlt/gameMap');
 const hlt = require('./hlt');
 const constants = require('./constants');
 
-let Miner = class {
+let Prospector = class {
   shouldMoveToAnotherLocation(ship, dropOffId, gameMap) {
     return ship.id !== dropOffId && 
            gameMap.get(ship.position).haliteAmount < hlt.constants.MAX_HALITE * (constants.GET_MOVING_PERCENTAGE / 100);
@@ -60,5 +60,5 @@ let Miner = class {
 }
 
 module.exports = {
-  Miner
+  Prospector
 };
