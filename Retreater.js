@@ -2,9 +2,14 @@ const hlt = require('./hlt');
 const constants = require('./constants');
 
 let Retreater = class {
-  shouldReturnToBase(ship, dropOffId) {
-    return ship.id !== dropOffId && 
-           ship.haliteAmount > hlt.constants.MAX_HALITE * (constants.RETREAT_PERCENTAGE / 100);
+  shouldReturnToBase(ship, dropOffId, game) {
+    return (ship.id !== dropOffId &&
+           ship.haliteAmount > hlt.constants.MAX_HALITE * (constants.RETREAT_PERCENTAGE / 100)) ||
+           (ship.id !== dropOffId &&
+            game.turnNumber > 0.90 * hlt.constants.MAX_TURNS &&
+            ship.haliteAmount > hlt.constants.MAX_HALITE * (constants.RETREAT_PERCENTAGE / 200)) ||
+           (ship.id !== dropOffId &&
+            game.turnNumber > 0.95 * hlt.constants.MAX_TURNS);
   }
 
   retreat(gameMap, player, ship) {

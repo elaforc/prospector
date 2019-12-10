@@ -44,7 +44,7 @@ game.initialize().then(async () => {
 
           // if ship is getting close to full capacity
           // retreat to nearest drop off location
-          if (retreater.shouldReturnToBase(ship, dropOffId)) {
+          if (retreater.shouldReturnToBase(ship, dropOffId, game)) {
             commandQueue.push(retreater.retreat(gameMap, me, ship));
           }
 
