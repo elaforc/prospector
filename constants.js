@@ -16,13 +16,13 @@ module.exports = {
      * game will just focus on collecting halite with
      * the entities it has.
      */
-    STOP_BUILDING_TURN: 75,
+    STOP_BUILDING_TURN: 65,
     /**
      * The turn number to start considering
      * building a dropoff. If built too soon the dropoff
      * will likely be really close to the shipyard
      */
-    START_DROPOFF_TURN: 20,
+    START_DROPOFF_TURN: 75,
     /**
      * Maximum number of dropoffs to build
      */
@@ -31,7 +31,7 @@ module.exports = {
      * What percentage of maximum capacity should a ship
      * go back to drop off halite
      */
-    RETREAT_PERCENTAGE: 80,
+    RETREAT_PERCENTAGE: 70,
     /**
      * What percentage of halite remaining should a ship
      * decide to move on to another cell in the map
@@ -43,10 +43,15 @@ module.exports = {
      * seam. This is important otherwise every ship is trying
      * to do the same thing.
      */
-    ENTROPY: 5,
+    ENTROPY: 100,
     /**
      * Number of ships to build before focusing on gathering
      * halite
      */
-    NUMBER_OF_SHIPS: 7
+    NUMBER_OF_SHIPS: 7,
+    /**
+     * Amount of halite a cell should have in it to consider
+     * going there
+     */
+    HALITE_THRESHOLD: 100
 };

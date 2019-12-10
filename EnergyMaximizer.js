@@ -59,11 +59,11 @@ let EnergyMaximizer = class {
     let bottomRow = seams[seams.length - 1];
     let node = this.findMaximumBackpointer(bottomRow);
     backTrace.push(new Point(node.current, seams.length - 1));
-    this.energies[node.current,seams.length - 1] = 0;
+    this.energies[seams.length - 1][node.current] = 0;
     for (let y = seams.length - 2; y >= 0; y--){
       node = seams[y][node.xPointer];
       backTrace.push(new Point(node.current, y));
-      this.energies[node.current][y] = 0;
+      this.energies[y][node.current] = 0;
     }
     return backTrace.reverse();
   }

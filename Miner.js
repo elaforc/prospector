@@ -12,21 +12,23 @@ let Miner = class {
   //this function is used to find the closest **VIABLE**
   //game map position within the seam to the 
   //given ship (source)
-  findClosestSafeMove(source, seam, gameMap){
+  findClosestSafeMove(source, seams, gameMap){
     let distance = 1000;
-    let pointer = 0;
-    for (let i = 0; i < seam.length; i++) {
-      let currentDistance = Math.abs(source.x - seam[i].x) + Math.abs(source.y - seam[i].y); //basic cartesian distance function
-      let seamPosition = new Position(seam[i].x, seam[i].y);
-      if (currentDistance == 0) {continue;} //if the same position, do nothing
-      else if (gameMap.get(seamPosition).haliteAmount < 100) {continue;} //if the position has a small amount of halite
-      else if (!gameMap.get(seamPosition).isEmpty) { continue; } //collision detection
-      else if (currentDistance < distance) {
-        distance = currentDistance;
-        pointer = i;
-      }
-      else {
-        continue; //if the position is farther away than the best current pointer
+    let pointer = {x: 0, y:0};
+    for (let i = 0; i < seams.length; i++) {
+      for (let j = 0; j < seams[i].length; j++) {
+        let currentDistance = Math.abs(source.x - seams[i][j].x) + Math.abs(source.y - seams[i][j].y); //basic cartesian distance function
+        let seamPosition = new Position(seams[i][j].x, seams[i][j].y);
+        if (currentDistance == 0) {continue;} //if the same position, do nothing
+        else if (gameMap.get(seamPosition).haliteAmount < constants.HALITE_THRESHOLD) {continue;} //if the position has a small amount of halite
+        else if (!gameMap.get(seamPosition).isEmpty) { continue; } //collision detection
+        else if (currentDistance < distance) {
+          distance = currentDistance;
+          pointer = {x: i, y: j};
+        }
+        else {
+          continue; //if the position is farther away than the best current pointer
+        }
       }
     }
     return pointer;
@@ -34,10 +36,9 @@ let Miner = class {
 
   navigate(gameMap, ship, seams) {
     const source = ship.position;
-    const seamIndex = Math.floor(Math.random() * constants.NUMBER_OF_SEAMS);
 
-    let destination = this.findClosestSafeMove(source, seams[seamIndex], gameMap);
-    let [yDir, xDir] = GameMap._getTargetDirection(source, seams[seamIndex][destination]);
+    let destination = this.findClosestSafeMove(source, seams, gameMap);
+    let [yDir, xDir] = GameMap._getTargetDirection(source, seams[destination.x][destination.y]);
 
     let safeMove;
     if (yDir === null && xDir === null) { safeMove = Direction.Still; }
