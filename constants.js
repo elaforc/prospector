@@ -20,7 +20,7 @@ module.exports = {
     /**
      * Maximum number of dropoffs to build
      */
-    MAXIMUM_NUM_DROPOFFS: 1,
+    MAXIMUM_NUM_DROPOFFS: 2,
     /**
      * What percentage of maximum capacity should a ship
      * go back to drop off halite

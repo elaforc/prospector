@@ -34,7 +34,6 @@ game.initialize().then(async () => {
         //need more than 1 to create entropy and get out of local maximums
         foreman.generateTopSeams(gameMap, me, seams);
 
-        //assumes only one dropoff is made at the moment
         if (dropOffCreator.shouldCreateDropOff(game, me)) {
           let obj = dropOffCreator.makeDropOff(gameMap, me)
           dropOffId = obj.dropOffId;

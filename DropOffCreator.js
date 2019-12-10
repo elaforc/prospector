@@ -13,10 +13,19 @@ let DropOffCreator = class {
   makeDropOff(gameMap, player) {
     let distance = 0;
     let dropOffId = -1;
-    for (const ship of player.getShips()) {
-      if (gameMap.calculateDistance(player.shipyard.position, ship.position) > distance) {
-        dropOffId = ship.id;
-        distance = gameMap.calculateDistance(player.shipyard.position, ship.position);
+    let ships = player.getShips();
+    let dropOffs = player.getDropoffs();
+    dropOffs.push(player.shipyard);
+
+    for (let i = 0; i < ships.length; i++) {
+      for (let j = 0; j < dropOffs.length; j++) {
+        let entityOne = ships[i];
+        let entityTwo = dropOffs[j];
+        let current = gameMap.calculateDistance(entityOne.position, entityTwo.position);
+        if (current > distance) {
+          dropOffId = ships[i].id;
+          distance = gameMap.calculateDistance(entityOne.position, entityTwo.position);
+        }
       }
     }
 

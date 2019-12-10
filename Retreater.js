@@ -15,13 +15,20 @@ let Retreater = class {
   retreat(gameMap, player, ship) {
     let shipyardDistance = gameMap.calculateDistance(player.shipyard.position, ship.position);
     let dropOffDistance = 100000;
+    let dropOffId = 0;
 
     if (player.getDropoffs().length > 0) {
-      dropOffDistance = gameMap.calculateDistance(player.getDropoffs()[0].position, ship.position);
+      for(let i = 0; i < player.getDropoffs().length; i++) {
+        let currentDistance = gameMap.calculateDistance(player.getDropoffs()[i].position, ship.position);
+        if(currentDistance < dropOffDistance) {
+          dropOffDistance = currentDistance;
+          dropOffId = i;
+        }
+      }
     }
 
     const destination = shipyardDistance < dropOffDistance ? player.shipyard.position : 
-                                                             player.getDropoffs()[0].position;
+                                                             player.getDropoffs()[dropOffId].position;
     const safeMove = gameMap.naiveNavigate(ship, destination);
     return ship.move(safeMove);
   }
