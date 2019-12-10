@@ -12,7 +12,7 @@ const constants = require('./constants');
 const game = new hlt.Game();
 
 game.initialize().then(async () => {
-    await game.ready('TeamEric');
+    await game.ready('#TeamEric');
 
     logging.info(`My Player ID is ${game.myId}.`);
 
@@ -34,6 +34,8 @@ game.initialize().then(async () => {
         //need more than 1 to create entropy and get out of local maximums
         foreman.generateTopSeams(gameMap, me, seams);
 
+        //if it makes sense to create a new dropoff from
+        //an existing ship, do so.
         if (dropOffCreator.shouldCreateDropOff(game, me)) {
           let obj = dropOffCreator.makeDropOff(gameMap, me)
           dropOffId = obj.dropOffId;

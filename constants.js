@@ -6,9 +6,9 @@ module.exports = {
     NUMBER_OF_SEAMS: 10,
     /**
      * What percentage of the game to stop building
-     * entities. After this percentage is hit the 
+     * ships. After this percentage is hit the 
      * game will just focus on collecting halite with
-     * the entities it has.
+     * the ships it has.
      */
     STOP_BUILDING_TURN: 65,
     /**
@@ -42,7 +42,7 @@ module.exports = {
      * Number of ships to build before focusing on gathering
      * halite
      */
-    NUMBER_OF_SHIPS: 15,
+    NUMBER_OF_SHIPS: 25,
     /**
      * Amount of halite a cell should have in it to consider
      * going there
