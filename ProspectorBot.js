@@ -1,5 +1,5 @@
 const { DropOffCreator } = require('./DropOffCreator');
-const { SeamGenerator } = require('./SeamGenerator');
+const { Foreman } = require('./Foreman');
 const { Retreater } = require('./Retreater');
 const { Prospector } = require('./Prospector');
 const { ShipCreator } = require('./ShipCreator');
@@ -22,7 +22,7 @@ game.initialize().then(async () => {
         const commandQueue = [];
         const dropOffCreator = new DropOffCreator();
         const shipCreator = new ShipCreator();
-        const seamGenerator = new SeamGenerator();
+        const foreman = new Foreman();
         const retreater = new Retreater();
         const prospector = new Prospector();
         let seams = [];
@@ -30,7 +30,7 @@ game.initialize().then(async () => {
 
         //find muliple energy laden seams within the game map
         //need more than 1 to create entropy and get out of local maximums
-        seamGenerator.generateTopSeams(gameMap, me, seams);
+        foreman.generateTopSeams(gameMap, me, seams);
 
         //assumes only one dropoff is made at the moment
         if (dropOffCreator.shouldCreateDropOff(game, me)) {

@@ -2,7 +2,7 @@ const hlt = require('./hlt');
 const constants = require('./constants');
 const { Miner, MapConverter } = require('./Miner');
 
-let SeamGenerator = class {
+let Foreman = class {
   generateTopSeams(gameMap, player, seams) {
     const converter = new MapConverter();
     let energies = converter.convertMap(gameMap);
@@ -16,5 +16,5 @@ let SeamGenerator = class {
 }
 
 module.exports = {
-  SeamGenerator
+  Foreman
 };
