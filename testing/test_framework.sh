@@ -1,6 +1,6 @@
 #!/bin/bash
 
-command="../halite_nix --no-replay --no-logs -vvv --width 32 --height 32 'node ../ProspectorBot.js' 'node ../archive/MyBot.js' 2>&1"
+command="../halite_osx --no-replay --no-logs -vvv --width 32 --height 32 'node ../ProspectorBot.js' 'node ../archive/MyBot.js' 2>&1"
 OUTPUT=$(eval "$command")
 
 ids=$(echo "$OUTPUT" | awk '/was rank [0-9]+ with [0-9]* halite/ {print $3;}' | cut -d , -f1)
