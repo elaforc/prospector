@@ -6,10 +6,11 @@ let Retreater = class {
     return (ship.id !== dropOffId &&
            ship.haliteAmount > hlt.constants.MAX_HALITE * (constants.RETREAT_PERCENTAGE / 100)) ||
            (ship.id !== dropOffId &&
-            game.turnNumber > 0.90 * hlt.constants.MAX_TURNS &&
-            ship.haliteAmount > hlt.constants.MAX_HALITE * (constants.RETREAT_PERCENTAGE / 200)) ||
+           game.turnNumber > 0.94 * hlt.constants.MAX_TURNS &&
+           ship.haliteAmount > 90) ||
            (ship.id !== dropOffId &&
-            game.turnNumber > 0.95 * hlt.constants.MAX_TURNS);
+            game.turnNumber > 0.90 * hlt.constants.MAX_TURNS &&
+            ship.haliteAmount > hlt.constants.MAX_HALITE * (constants.RETREAT_PERCENTAGE / 200));
   }
 
   retreat(gameMap, player, ship) {

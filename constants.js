@@ -3,7 +3,7 @@ module.exports = {
      * Number of seams to select from when choosing a path
      * The larger the number, the more random the possibilities
      */
-    NUMBER_OF_SEAMS: 10,
+    NUMBER_OF_SEAMS: 12,
     /**
      * What percentage of the game to stop building
      * ships. After this percentage is hit the 
